@@ -1,3 +1,0 @@
-Hello world! This is a test file.
-Hello again, world. Testing, testing, 1 2 3.
-Words repeat: hello hello world.
