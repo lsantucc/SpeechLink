@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload with Status Code</title>
+</head>
+<body>
+    <form id="uploadForm" method="POST" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="file" accept=".mp3, .wav, .m4a, .flac, .ogg, .aac, .wma, .mp4, .webm" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <div id="result"></div>
+
+    <!-- Upload form. Use this notation for commenting in the HTML part --> 
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
