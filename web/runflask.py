@@ -11,7 +11,7 @@ import hashlib
 app = Flask(__name__)
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-app.config['UPLOAD_FOLDER'] = f"{dir_path}/uploads"
+app.config['UPLOAD_FOLDER'] = f"{dir_path}\\uploads"
 app.config['MAX_CONTENT_LENGTH'] = 64 * 1000 * 1000 # max size of 64 mb
 
 # SQL Injection is mostly prevented by default; the default response type in flask is HTML which is automatically escaped (sanitized)
