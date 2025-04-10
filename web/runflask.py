@@ -24,8 +24,13 @@ if not os.path.exists("temp"):
     os.mkdir("temp")
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
+<<<<<<< HEAD
 app.config['UPLOAD_FOLDER'] = os.path.join(dir_path, "temp")
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1000 * 1000 # max size of 16 mb
+=======
+app.config['UPLOAD_FOLDER'] = f"{dir_path}\\temp"
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1000 * 1000 # max size of 32 mb
+>>>>>>> fd1b7bb6951b21e11f9a9dc2d35b6d904ac6957f
 
 # SQL Injection is mostly prevented by default; the default response type in flask is HTML which is automatically escaped (sanitized)
 @app.route('/')
