@@ -100,7 +100,7 @@ def upload_raw_audio():
             return f'{upload_id}', 200
         
     except Exception as e:
-        return f'Exception {e}', 400
+        return f'Exception {e}', 420
 
 # display transcribed text via id
 @app.route('/display/<int:mp3_id>')
@@ -128,8 +128,8 @@ def display_api(mp3_id):
     #     db.disconnect(con)
     #     return f'<h1>No entry found for Upload ID {mp3_id}</h1>'
     db.disconnect(con)
-    shutil.rmtree("temp")
-    os.mkdir("temp")
+    #shutil.rmtree("temp")
+    #os.mkdir("temp")
     if entry:
         return f'''Filename: {entry[1]}. Detected language: {entry[5]}. Transcribed text: {entry[4]}. '''
     

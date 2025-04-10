@@ -23,8 +23,8 @@ def remove_extension(string):
 def transcribe(filepath):
     # Medium seems to be the best balance of speed and accuracy
     model = whisper.load_model("medium")
-    device = "cuda" 
-    model = model.to(device)
+    # device = "cuda" 
+    # model = model.to(device)
     filename, file_extension = os.path.splitext(filepath)
     # need to split audio into chunks of 30s
     audio = AudioSegment.from_file(filepath) 
