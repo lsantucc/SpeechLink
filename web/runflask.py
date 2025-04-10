@@ -10,8 +10,11 @@ import hashlib
 
 app = Flask(__name__)
 
+if not os.path.exists("temp"):
+    os.mkdir("temp")
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
-app.config['UPLOAD_FOLDER'] = f"{dir_path}\\uploads"
+app.config['UPLOAD_FOLDER'] = f"{dir_path}\\temp"
 app.config['MAX_CONTENT_LENGTH'] = 64 * 1000 * 1000 # max size of 64 mb
 
 # SQL Injection is mostly prevented by default; the default response type in flask is HTML which is automatically escaped (sanitized)
@@ -19,13 +22,13 @@ app.config['MAX_CONTENT_LENGTH'] = 64 * 1000 * 1000 # max size of 64 mb
 def index():
     return render_template("index.html")
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload_file', methods=['POST'])
 def upload_file():
     # check if the post request has the file part
     if 'file' not in request.files:
         flash('No file part')
         return '', 400
-        
+    
     file = request.files['file']
     # If the user does not select a file, the browser submits an
     # empty file without a filename.
@@ -37,7 +40,6 @@ def upload_file():
         filename = secure_filename(file.filename)
         path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(path)
-
         with open(path, "rb") as f:
             digest = hashlib.file_digest(f, "md5")
         hash = digest.hexdigest()
@@ -47,11 +49,8 @@ def upload_file():
         # hash check allows us to skip transcribing the text if we already have which saves time (40 seconds vs <0.5 seconds)
         entry = db.check_hash(con, hash)
         if entry:
-            upload_object = db.Upload(entry[1], entry[2], entry[3], entry[4], entry[5], entry[6])
-
-            if upload_object:
-                upload_id = entry[0]
-                return f'{upload_id}', 200
+            upload_id = entry[0]
+            return f'{upload_id}', 200
 
         else:
             transcribed_text, language = whisper_app.transcribe(path)
@@ -63,6 +62,40 @@ def upload_file():
             
     # if file isnt valid for whatever reason
     return '', 500
+
+@app.route('/upload_raw_audio', methods=['POST'])
+def upload_raw_audio():
+    if 'audio' not in request.files:
+        return '', 400
+    
+    try:
+        audio = request.files['audio'].read()
+        # we are receiving raw audio that we just read into bytes
+        # use current_time to avoid conflict where multiple uploads happen at once
+        current_time = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
+        filename = f"raw_audio_{current_time}.ogg"
+        path = f"{app.config['UPLOAD_FOLDER']}\\{filename}"
+        with open(path, 'wb') as f:
+            f.write(audio)
+        
+        # now that we've written the audio we can put it into whisper
+        con = db.connect()
+
+        transcribed_text, language = whisper_app.transcribe(path)
+        # audio uploaded via mic will never have same hash
+        upload_object = db.Upload(filename, os.path.getsize(path), datetime.now(), transcribed_text, language, 0)
+        
+        if upload_object:
+            upload_id = db.create_entry(con, upload_object)
+            return f'{upload_id}', 200
+        
+    except Exception as e:
+        return f'Exception {e}', 400
+    
+
+    
+
+
     
 # display transcribed text
 @app.route('/display/<int:mp3_id>')

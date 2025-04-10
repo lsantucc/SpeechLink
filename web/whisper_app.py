@@ -21,15 +21,6 @@ def remove_extension(string):
     return string
 
 def transcribe(filepath):
-    # load model
-    # filename = input("Enter file name including extension (ex. audio.mp3): ")
-
-    # Turbo is too slow for our use case. Also would need to convert to 128 mel bins which makes it even slower
-    # model = whisper.load_model("turbo") 
-
-    # Tiny is much faster, near instant, but has trouble recognizing spoken words
-    # model = whisper.load_model("tiny")
-
     # Medium seems to be the best balance of speed and accuracy
     model = whisper.load_model("medium")
     device = "cuda" 
@@ -48,7 +39,6 @@ def transcribe(filepath):
 
     # load audio and pad/trim it to fit 30 seconds for sliding window
     result = ""
-    os.mkdir(temp_dir)
     for i, chunk in enumerate(audio_chunks):
         chunk.export(out_f = f"{temp_dir}/time_split{i}{file_extension}", format = file_extension.replace('.', ''))
         audio = whisper.load_audio(f"{temp_dir}/time_split{i}{file_extension}") # this expects filepath not memory     
@@ -63,12 +53,12 @@ def transcribe(filepath):
         language = max(probs, key=probs.get)
 
         # decode the audio
-        # options = whisper.DecodingOptions(task="Translate" if language != "en" else "transcribe")
-        options = whisper.DecodingOptions()
+        options = whisper.DecodingOptions(task="Translate" if language != "en" else "transcribe")
+        #options = whisper.DecodingOptions()
         decoded = whisper.decode(model, mel, options)
         result += f"{decoded.text}"
 
-    shutil.rmtree(temp_dir)
+    # shutil.rmtree(temp_dir)
     final_result = ""
     for i, char in enumerate(result):
         if char.isupper() and result[i-2] != "," and i >= 2:
