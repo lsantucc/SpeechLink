@@ -59,12 +59,16 @@ def transcribe(filepath):
         result += f"{decoded.text}"
 
     # shutil.rmtree(temp_dir)
-    final_result = ""
-    for i, char in enumerate(result):
-        if char.isupper() and result[i-2] != "," and i >= 2:
-            final_result = final_result[:-1]
-            final_result += ". "
-        final_result += char
+    # Translated text does not have punctuation
+    if language != "en":
+        final_result = ""
+        for i, char in enumerate(result):
+            if char.isupper() and result[i-2] != "," and result[i-2] != "?" and result[i-2] != "!" and result[i-2] != "." and i >= 2:
+                final_result = final_result[:-1]
+                final_result += ". "
+            final_result += char
+    else:
+        final_result = result
 
     return final_result, language
 

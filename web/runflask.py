@@ -1,21 +1,31 @@
 # Flask server
 
 from flask import Flask, flash, request, render_template
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 from werkzeug.utils import secure_filename
 import db
 from datetime import datetime
 import whisper_app
 import hashlib
+import shutil
 
 app = Flask(__name__)
+
+limiter = Limiter(
+    get_remote_address, # can do ipdb abuse post with this to check need api key though
+    app=app,
+    default_limits=["200 per day", "50 per hour"],
+    storage_uri="memory://",
+)
 
 if not os.path.exists("temp"):
     os.mkdir("temp")
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 app.config['UPLOAD_FOLDER'] = f"{dir_path}\\temp"
-app.config['MAX_CONTENT_LENGTH'] = 64 * 1000 * 1000 # max size of 64 mb
+app.config['MAX_CONTENT_LENGTH'] = 32 * 1000 * 1000 # max size of 16 mb
 
 # SQL Injection is mostly prevented by default; the default response type in flask is HTML which is automatically escaped (sanitized)
 @app.route('/')
@@ -28,7 +38,7 @@ def upload_file():
     if 'file' not in request.files:
         flash('No file part')
         return '', 400
-    
+
     file = request.files['file']
     # If the user does not select a file, the browser submits an
     # empty file without a filename.
@@ -91,13 +101,8 @@ def upload_raw_audio():
         
     except Exception as e:
         return f'Exception {e}', 400
-    
 
-    
-
-
-    
-# display transcribed text
+# display transcribed text via id
 @app.route('/display/<int:mp3_id>')
 def display_api(mp3_id):
     con = db.connect()
@@ -122,9 +127,17 @@ def display_api(mp3_id):
     # else:
     #     db.disconnect(con)
     #     return f'<h1>No entry found for Upload ID {mp3_id}</h1>'
-
+    db.disconnect(con)
+    shutil.rmtree("temp")
+    os.mkdir("temp")
     if entry:
         return f'''Filename: {entry[1]}. Detected language: {entry[5]}. Transcribed text: {entry[4]}. '''
     
+# @app.route('/roomcode/<int:room_id>', methods=['POST'])
+# def room_code():
+    
+#     return
+
+
 if __name__ == "__main__":
     app.run(debug=True)
