@@ -24,7 +24,7 @@ if not os.path.exists("temp"):
     os.mkdir("temp")
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-app.config['UPLOAD_FOLDER'] = f"{dir_path}\\temp"
+app.config['UPLOAD_FOLDER'] = os.path.join(dir_path, "temp")
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1000 * 1000 # max size of 16 mb
 
 # SQL Injection is mostly prevented by default; the default response type in flask is HTML which is automatically escaped (sanitized)
@@ -84,7 +84,7 @@ def upload_raw_audio():
         # use current_time to avoid conflict where multiple uploads happen at once
         current_time = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
         filename = f"raw_audio_{current_time}.ogg"
-        path = f"{app.config['UPLOAD_FOLDER']}\\{filename}"
+        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         with open(path, 'wb') as f:
             f.write(audio)
         
