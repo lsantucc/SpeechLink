@@ -1,0 +1,6 @@
+flask
+Flask-Limiter
+Werkzeug
+openai-whisper 
+py-chocolatey
+pydub
