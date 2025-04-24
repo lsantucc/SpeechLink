@@ -3,20 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!--<link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css"> -->
     <title>Audio to Text Transcriber/Translator</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <form id="uploadForm" method="POST" enctype="multipart/form-data">
-        <input type="file" id="fileInput" name="file" accept=".mp3, .wav, .m4a, .flac, .ogg, .aac, .wma, .mp4, .webm" required>
-        <button type="submit">Upload</button>
-    </form>
+    <h1>Audio Translator</h1>
+    <h2>Upload a file or record audio to transcribe/translate</h2>
 
-    <button id="record" type="submit">Record audio</button>
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Left Column -->
+        <div class="column">
+            <form id="uploadForm" method="POST" enctype="multipart/form-data">
+                <!-- Modify the file input section -->
+<div class="form-group">
+    <label for="fileInput" class="custom-file-upload">
+        Choose File
+    </label>
+    <input type="file" id="fileInput" name="file" accept=".mp3, .wav, .m4a, .flac, .ogg, .aac, .wma, .mp4, .webm" required>
+</div>
+
+                <div class="form-group">
+                    <button type="submit">Upload</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Vertical Divider Line -->
+        <div class="vertical-line"></div>
+
+        <!-- Right Column -->
+        <div class="column">
+            <div class="form-group">
+                <button id="record">Record audio</button>
+            </div>
+        </div>
+    </div>
 
     <div id="result"></div>
+    
+    <div class="image-container">
+        <img src="assets/03c9f54c-e602-454a-85ab-1077b60f4a3a.jpg" alt="Description of the image">
+    </div>
 
-    <!-- Script is loaded below from the app.js file. Use this notation for commenting in the HTML part with the arrows and the !. --> 
     <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
