@@ -10,6 +10,7 @@ from datetime import datetime
 import whisper_app
 import hashlib
 import shutil
+import whisper
 
 app = Flask(__name__)
 
@@ -26,6 +27,9 @@ if not os.path.exists("temp"):
 dir_path = os.path.dirname(os.path.realpath(__file__))
 app.config['UPLOAD_FOLDER'] = os.path.join(dir_path, "temp")
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1000 * 1000 # max size of 32 mb
+device = "cuda"
+whisper_model = whisper.load_model("medium")
+whisper_model = whisper_model.to(device)
 
 # SQL Injection is mostly prevented by default; the default response type in flask is HTML which is automatically escaped (sanitized)
 @app.route('/')
@@ -63,7 +67,7 @@ def upload_file():
             return f'{upload_id}', 200
 
         else:
-            transcribed_text, language = whisper_app.transcribe(path)
+            transcribed_text, language = whisper_app.transcribe(path, whisper_model)
             upload_object = db.Upload(filename, os.path.getsize(path), datetime.now(), transcribed_text, language, hash)
         
             if upload_object:
@@ -80,6 +84,9 @@ def upload_raw_audio():
     
     try:
         audio = request.files['audio'].read()
+        # *** check decibel of audio; if its below 30 decibels we just ignore (involves sending 
+        # specific response to frontend indicating this)
+        pydub
         # we are receiving raw audio that we just read into bytes
         # use current_time to avoid conflict where multiple uploads happen at once
         current_time = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
@@ -91,7 +98,7 @@ def upload_raw_audio():
         # now that we've written the audio we can put it into whisper
         con = db.connect()
 
-        transcribed_text, language = whisper_app.transcribe(path)
+        transcribed_text, language = whisper_app.transcribe(path, whisper_model)
         # audio uploaded via mic will never have same hash
         upload_object = db.Upload(filename, os.path.getsize(path), datetime.now(), transcribed_text, language, 0)
         

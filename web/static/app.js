@@ -1,6 +1,7 @@
 const recordButton = document.getElementById('record')
 const resultButton = document.getElementById('result')
 recordButton.innerText = "Record"
+let sleeping = false
 
 // Upload button. Eventually we can use querySelector instead when we make classes for styling
 document.getElementById('uploadForm').addEventListener('submit', function(event) {
@@ -65,7 +66,8 @@ document.getElementById('record').addEventListener('click', function(event) {
         .getUserMedia(constraints)
         .then((stream) => {
             const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-            mediaRecorder.start();
+            // get data every 3000 ms (3 second)
+            mediaRecorder.start(3000);
             recording = true;
             recordButton.innerText = "Recording";
             // creates top button
@@ -124,7 +126,47 @@ document.getElementById('record').addEventListener('click', function(event) {
             }
             // this aggregates data into chunks from the event e (takes place everytime new data is available)
             mediaRecorder.ondataavailable = (e) => {
-                chunks.push(e.data);
+                let data = e.data
+                // chunks.push(e.data);
+                // need to split on silence or something
+                const blobFormData = new FormData();
+                const blob = new Blob(data, {type: "audio/webm"});
+                blobFormData.append("audio", blob);
+                fetch('/upload_raw_audio', {
+                    method: 'POST',
+                    body: blobFormData
+                })
+                .then(response => {
+                    if (response.status === 200) {
+                        console.log("File uploaded successfully (code 200)");
+                        // response.text() returns a promise which is asynchronous. We need to return it here so the next .then() statement can use it (it goes into upload_id)
+                        return response.text();
+                    } else if (response.status === 401) {
+                        console.log(response.textContent);
+                        throw new error("File uploaded unsuccessfully (code 400)")
+                    } else if (response.status === 500) {
+                        console.log("File uploaded unsuccessfully (code 500)");
+                        document.getElementById('result').innerText = "Failed with error code 500";
+                        throw new error("File uploaded unsuccessfully (code 500)")
+                    }
+                })
+                // get transcribed text as a rseponse
+                .then(upload_id => {
+                    return fetch(`/display/${upload_id}`);
+                })
+                // response comes from the previous .then which returns from a fetch
+                // need error checking on the fetch
+                // extract text
+                .then(response => response.text())
+                .then(data => {
+                    // set text on frontend
+                    document.getElementById('result').innerText = data;
+                })
+                // error checking
+                .catch(error => {
+                    console.error('Error uploading file:', error);
+                    document.getElementById('result').innerText = 'Error uploading file.';
+                });
             };
         })
         .catch((err) => {

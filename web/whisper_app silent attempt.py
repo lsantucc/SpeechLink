@@ -21,7 +21,15 @@ def remove_extension(string):
 
     return string
 
-def transcribe(filepath):
+def transcribe(filepath, model):
+    # FIRST check to see if the audio we get even has words
+    # *** check decibel of audio; if its below 30 decibels we just ignore (involves sending 
+    # specific response to frontend indicating this)
+    pydub
+
+
+
+
     # load model
     # filename = input("Enter file name including extension (ex. audio.mp3): ")
 
@@ -32,7 +40,6 @@ def transcribe(filepath):
     # model = whisper.load_model("tiny")
 
     # Medium seems to be the best balance of speed and accuracy
-    model = whisper.load_model("medium")
     filename, file_extension = os.path.splitext(filepath)
     # need to split audio into chunks of 30s
     newAudio = AudioSegment.from_file(filepath) 

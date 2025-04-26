@@ -20,9 +20,8 @@ def remove_extension(string):
 
     return string
 
-def transcribe(filepath):
+def transcribe(filepath, model):
     # Medium seems to be the best balance of speed and accuracy
-    model = whisper.load_model("medium")
     # device = "cuda" 
     # model = model.to(device)
     filename, file_extension = os.path.splitext(filepath)
