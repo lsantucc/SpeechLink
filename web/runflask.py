@@ -27,7 +27,7 @@ if not os.path.exists("temp"):
 dir_path = os.path.dirname(os.path.realpath(__file__))
 app.config['UPLOAD_FOLDER'] = os.path.join(dir_path, "temp")
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1000 * 1000 # max size of 32 mb
-device = "cuda"
+device = "cpu"
 whisper_model = whisper.load_model("medium")
 whisper_model = whisper_model.to(device)
 
