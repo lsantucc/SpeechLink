@@ -1,4 +1,4 @@
-# Flask server
+# Flask server. Make this more modular (i.e. make utils.py file that contains things like check_decibels etc)
 
 from flask import Flask, flash, request, render_template
 from flask_limiter import Limiter
@@ -9,15 +9,18 @@ import db
 from datetime import datetime
 import whisper_app
 import hashlib
-import shutil
-import whisper
+import whisperx
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
+
+# https://pythonexamples.org/python-flask-and-websocket-example/
+socketio = SocketIO(app)
 
 limiter = Limiter(
     get_remote_address, # can do ipdb abuse post with this to check need api key though
     app=app,
-    default_limits=["200 per day", "50 per hour"],
+    default_limits=["2000 per day", "500 per hour"], # current websocket method maybe not work with this
     storage_uri="memory://",
 )
 
@@ -27,15 +30,18 @@ if not os.path.exists("temp"):
 dir_path = os.path.dirname(os.path.realpath(__file__))
 app.config['UPLOAD_FOLDER'] = os.path.join(dir_path, "temp")
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1000 * 1000 # max size of 32 mb
-device = "cpu"
-whisper_model = whisper.load_model("medium")
-whisper_model = whisper_model.to(device)
+
+# create whisper model so we don't have to re-create every time in whisper_app.transcribe()
+device = "cuda"
+whisper_model = whisperx.load_model("medium", device=device)
 
 # SQL Injection is mostly prevented by default; the default response type in flask is HTML which is automatically escaped (sanitized)
 @app.route('/')
 def index():
+    print(f"CWD is {os.getcwd()}")
     return render_template("index.html")
 
+# Route for when user uploads a file
 @app.route('/upload_file', methods=['POST'])
 def upload_file():
     # check if the post request has the file part
@@ -77,69 +83,43 @@ def upload_file():
     # if file isnt valid for whatever reason
     return '', 500
 
-@app.route('/upload_raw_audio', methods=['POST'])
-def upload_raw_audio():
-    if 'audio' not in request.files:
-        return '', 400
-    
+# Socket for live recording
+@socketio.on('message')
+def receive_raw_audio(data):
     try:
-        audio = request.files['audio'].read()
-        # *** check decibel of audio; if its below 30 decibels we just ignore (involves sending 
-        # specific response to frontend indicating this)
-        pydub
-        # we are receiving raw audio that we just read into bytes
-        # use current_time to avoid conflict where multiple uploads happen at once
-        current_time = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
-        filename = f"raw_audio_{current_time}.ogg"
-        path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        with open(path, 'wb') as f:
-            f.write(audio)
-        
-        # now that we've written the audio we can put it into whisper
-        con = db.connect()
+        # implement silence checking here, etc.
 
-        transcribed_text, language = whisper_app.transcribe(path, whisper_model)
-        # audio uploaded via mic will never have same hash
-        upload_object = db.Upload(filename, os.path.getsize(path), datetime.now(), transcribed_text, language, 0)
-        
-        if upload_object:
-            upload_id = db.create_entry(con, upload_object)
-            return f'{upload_id}', 200
+        # debugging
+        print(type(data), len(data))
+
+        # need database to hold transcribed text overtime for room code function
+        transcribed_text, language = whisper_app.transcribe(data, whisper_model)
+
+        # send text to frontend via websocket. maybe need to use emit
+        socketio.emit("message", transcribed_text)
+        print("emitted to frontend")
         
     except Exception as e:
+        print(e)
         return f'Exception {e}', 420
 
 # display transcribed text via id
 @app.route('/display/<int:mp3_id>')
 def display_api(mp3_id):
+    # connect to db
     con = db.connect()
     # returns tuple
     entry = db.return_entry(con, mp3_id)
 
-    # if entry:
-    #     db.disconnect(con)
-    #     return f'''
-    #     <!doctype html>
-    #     <title>Test</title>
-    #     <h1>Data entry</h1>
-    #     <pre>
-    #     Upload ID: {entry[0]}
-    #     File Name: {entry[1]}
-    #     File Size: {entry[2]} bytes
-    #     Upload Time: {entry[3]}
-    #     Transcribed Text: {entry[4]}
-    #     Language: {entry[5]}e
-    #     </pre>
-    #     '''
-    # else:
-    #     db.disconnect(con)
-    #     return f'<h1>No entry found for Upload ID {mp3_id}</h1>'
+    # disconnect from db
     db.disconnect(con)
+
     #shutil.rmtree("temp")
     #os.mkdir("temp")
     if entry:
         return f'''Filename: {entry[1]}. Detected language: {entry[5]}. Transcribed text: {entry[4]}. '''
     
+# roomcode route
 # @app.route('/roomcode/<int:room_id>', methods=['POST'])
 # def room_code():
     
@@ -147,4 +127,4 @@ def display_api(mp3_id):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    socketio.run(app, debug=True)

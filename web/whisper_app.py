@@ -1,75 +1,52 @@
-# Transcription/translation using whisper
-# Whisper can only take 30 seconds of audio at a time. If the input file is longer than 30 seconds
-#    we need to break it into chunks
-# If we return a lot of text it needs to be formatted to be displayed properly otherwise it will be one huge line
-# Need to improve speed by forcing GPU use and parallel processing
-
-# pip install -U openai-whisper py-chocolatey 
-# choco install ffmpeg (with elevated priveleges)
-import whisper
+import whisperx
+import tempfile
 import os
-from pydub import AudioSegment
-import shutil
+import datetime
 
-file_types = [".mp3", ".wav", ".m4a", ".flac", ".ogg", ".aac", ".wma", ".mp4", ".webm"]
-temp_dir = "temp"
+def transcribe(audio_data, model, device="cuda"):
+    try:
+        print(type(audio_data))
+        # Despite claiming support for str, bytes, and os.PathLike objects I couldn't get whisperX to work with
+        # bytes because of ffmpeg piping issue
+        # Workaround is to create a temporary file, has surprisingly low time cost
 
-def remove_extension(string):
-    for file_type in file_types:
-        string = string.replace(file_type, "")
+        # Create temporary file (only took 0:00:00.002253 for 7 second file, low cost)
+        start_time = datetime.datetime.now()    
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".webm") as tmp:
+            tmp.write(audio_data)
+            tmp_path = tmp.name
+        end_time = datetime.datetime.now() - start_time
+        print(end_time)
+        
+        # Load audio
+        audio = whisperx.load_audio(tmp_path)
 
-    return string
+        # Delete file containing audio data since we are done with it 
+        os.unlink(tmp_path)
+        
+        # Transcribe
+        result = model.transcribe(audio, batch_size=16)
+        language = result["language"]
+        
+        # Align segments. This will be useful for when words are split. Can use all segments that we have
+        # with relevant calculated timestamps and align
+        model_a, metadata = whisperx.load_align_model(language_code=language, device=device)
+        result = whisperx.align(result["segments"], model_a, metadata, audio, device)
+        
+        result_string = "".join(segment["text"] for segment in result["segments"])
+        return result_string, language
+    
+    except Exception as e:
+        print(f"Error in whisper_app {e}")
 
-def transcribe(filepath, model):
-    # Medium seems to be the best balance of speed and accuracy
-    # device = "cuda" 
-    # model = model.to(device)
-    filename, file_extension = os.path.splitext(filepath)
-    # need to split audio into chunks of 30s
-    audio = AudioSegment.from_file(filepath) 
-    timeIncrement = 30 * 1000 # 30 seconds -> 30000 ms
-    totalTime = len(audio) # total time in ms
-    audio_chunks = []
-   
-    time = 0
-    while time < totalTime:
-        audio_chunks.append(audio[time:time+timeIncrement])
-        time += timeIncrement
-
-    # load audio and pad/trim it to fit 30 seconds for sliding window
-    result = ""
-    for i, chunk in enumerate(audio_chunks):
-        chunk.export(out_f = f"{temp_dir}/time_split{i}{file_extension}", format = file_extension.replace('.', ''))
-        audio = whisper.load_audio(f"{temp_dir}/time_split{i}{file_extension}") # this expects filepath not memory     
-        audio = whisper.pad_or_trim(audio)
-
-        # make log-Mel spectrogram and move to the same device as the model
-        mel = whisper.log_mel_spectrogram(audio).to(model.device)
-        # print(mel.shape)
-
-        # detect the spoken language
-        _, probs = model.detect_language(mel)
-        language = max(probs, key=probs.get)
-
-        # decode the audio
-        options = whisper.DecodingOptions(task="Translate" if language != "en" else "transcribe")
-        #options = whisper.DecodingOptions()
-        decoded = whisper.decode(model, mel, options)
-        result += f"{decoded.text}"
-
-    # shutil.rmtree(temp_dir)
-    # Translated text does not have punctuation
-    if language != "en":
-        final_result = ""
-        for i, char in enumerate(result):
-            if char.isupper() and result[i-2] != "," and result[i-2] != "?" and result[i-2] != "!" and result[i-2] != "." and i >= 2:
-                final_result = final_result[:-1]
-                final_result += ". "
-            final_result += char
-    else:
-        final_result = result
-
-    return final_result, language
-
+# Test
 if __name__ == "__main__":
-    transcribe()
+    device = "cuda"
+    model = whisperx.load_model("medium", device=device)
+
+    with open(r"PUT PATH HERE", 'rb') as f:
+        audio_data = f.read() 
+
+    transcription, language = transcribe(audio_data, model)
+    print(f"Transcription: {transcription}")
+    print(f"Language: {language}")
