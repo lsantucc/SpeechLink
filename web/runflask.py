@@ -32,9 +32,10 @@ app.config['UPLOAD_FOLDER'] = os.path.join(dir_path, "temp")
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1000 * 1000 # max size of 32 mb
 
 # create whisper model so we don't have to re-create every time in whisper_app.transcribe()
-device = "cuda"
+device = "cpu"
 model="small"
-whisper_model = whisperx.load_model(model, device=device)
+compute_type = "float32"
+whisper_model = whisperx.load_model(model, device=device, compute_type=compute_type)
 
 # SQL Injection is mostly prevented by default; the default response type in flask is HTML which is automatically escaped (sanitized)
 @app.route('/')
@@ -42,9 +43,12 @@ def index():
     print(f"CWD is {os.getcwd()}")
     return render_template("index.html")
 
-@app.route('/room')
-def room():
-    return render_template("room.html")
+@app.route('/room/host')
+def host():
+    return render_template("host.html")
+@app.route('/room/user')
+def user():
+    return render_template("user.html")
 
 # Route for when user uploads a file
 @app.route('/upload_file', methods=['POST'])
