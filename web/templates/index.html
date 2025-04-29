@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio to Text Transcriber/Translator</title>
-    <link href="styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
 
 </head>
@@ -53,10 +53,9 @@
     <div id="result"></div>
     
     <div class="image-container">
-        <img src="assets/mic.jpg" alt="A microphone">
+        <img src="{{ url_for('static', filename='assets/mic.jpg') }}" alt="Mic">
 
     </div>
-
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
