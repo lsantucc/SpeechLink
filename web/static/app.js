@@ -4,10 +4,6 @@ recordButton.innerText = "Record"
 const address = "localhost:5000"
 let processing = false;
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 // Upload button. Eventually we can use querySelector instead when we make classes for styling
 document.getElementById('uploadForm').addEventListener('submit', function(event) {
     // Use normal HTTP requests here since we are sending one file a single time
@@ -83,8 +79,8 @@ document.getElementById('record').addEventListener('click', function(event) {
                 // https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/mimeType
                 mimeType: 'audio/webm'
               });
-            // 2000 means ondatavailable will be called every 2000 ms or 2 seconds
-            mediaRecorder.start(2000);
+            // 1000 means ondatavailable will be called every 2000 ms or 2 seconds
+            mediaRecorder.start(1000);
 
             // create socket https://socket.io/docs/v4/tutorial
             const socket = io(); 
@@ -112,10 +108,6 @@ document.getElementById('record').addEventListener('click', function(event) {
                 recording = false;
                 document.body.removeChild(stopButton);
             }
-            mediaRecorder.onstart = () => {
-                sleep(30);
-                headerBlob = mediaRecorder.requestData();
-            }
             // change styling of website here while recording
             mediaRecorder.onstop = () => {
                 console.log("Mediarecorder stopped")
@@ -133,35 +125,26 @@ document.getElementById('record').addEventListener('click', function(event) {
                 // send to backend via websocket
                 // await message so we dont overload backend
                 if(headerBlob == null) {
-                    console.log("null")
+                    console.log("headerBlob is null")
                     // get webm header. if we don't append this to every chunk we send it won't be recognized as valid
-                    headerBlob = e.data;
+                    // get first 100 bytes
+                    headerBlob = e.data.slice(0, 2000);
                     chunks.push(headerBlob)
-                }
-                // processing refers to if we are currently awaiting a response from the server or not
+                }  
                 if(processing) {
-                    chunks.push(e.data)
-                    console.log("processing happening pushing chunk for later")
-                    return
+                    chunks.push(e.data);
+                    return;
                 }
-                console.log("Processing is false, sending chunk")
                 chunks.push(e.data)
                 // concatenate audio chunks and send to backend
                 let conBlob = new Blob(chunks, { type: 'audio/webm' });
                 socket.emit('message', conBlob) 
                 console.log("Message sent")
-                
-                // reset chunks. if we want to pass the audio cumulatively (helpful for context, better transcription) then don't do this
-                //chunks = [];
-                chunks.length = 0;
-                // push header to make next audio chunk valid
-                chunks.push(headerBlob);
-
                 processing = true;
                 // await response from server
                 await new Promise((resolve, reject) => {
                     socket.on('message', (msg) => {
-                        result.innerText += msg;
+                        result.innerText = msg;
                         console.log(`MESSAGE RECEIVED ${msg}`);
                         resolve();
                     });
