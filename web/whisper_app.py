@@ -4,34 +4,9 @@ import whisperx
 import tempfile
 import os
 from pydub import AudioSegment
+from pydub.silence import detect_silence
 import numpy as np
 import datetime
-
-def is_silent(audio_path, silence_threshold=-40.0, chunk_size=10):
-    """
-    Check if the audio is silent.
-    
-    :param audio_path: Path to the audio file
-    :param silence_threshold: Silence threshold in dB (e.g., -40 dB)
-    :param chunk_size: Size of the chunk to process in milliseconds
-    :return: True if the audio is silent, False otherwise
-    """
-    # Load the audio file
-    audio = AudioSegment.from_file(audio_path)
-    
-    # Convert to mono if stereo
-    if audio.channels > 1:
-        audio = audio.set_channels(1)
-    
-    # Process the audio in chunks
-    for i in range(0, len(audio), chunk_size):
-        chunk = audio[i:i+chunk_size]
-        # Get the loudness of the chunk in dB
-        loudness = chunk.dBFS  # dB relative to full scale
-        if loudness > silence_threshold:
-            return False  # If any chunk is above the silence threshold, it's not silent
-    
-    return True  # If all chunks are below the threshold, it's silent
 
 def transcribe(audio_data, model, device="cuda"):
     try:
@@ -50,8 +25,9 @@ def transcribe(audio_data, model, device="cuda"):
         end_time = datetime.datetime.now() - start_time
         print(end_time)
 
-        if is_silent(tmp_path):
-            return "", ""
+        # audio_segment = AudioSegment.from_file(tmp_path)
+        # if detect_silence(audio_segment, min_silence_len=450, silence_thresh=-40):
+        #     return "", ""
         
         # Load audio
         audio = whisperx.load_audio(tmp_path)
