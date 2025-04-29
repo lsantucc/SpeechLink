@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio to Text Transcriber/Translator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+
+</head>
+<body>
+    <h1>Audio Translator</h1>
+    <h2>Room Session</h2>
+
+    <!-- Room Section -->
+
+    <h3>  USER Session ID: <span id="codeOutput"></span> </h3>
+    <script>
+        let params = new URLSearchParams(window.location.search);
+        let sessionID = params.get("code");
+
+        document.getElementById("codeOutput").textContent = sessionID;
+
+        </script>
+    
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
