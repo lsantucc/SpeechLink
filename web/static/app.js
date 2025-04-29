@@ -4,6 +4,14 @@ recordButton.innerText = "Record"
 const address = "localhost:5000"
 let processing = false;
 
+document.getElementById('createRoom').addEventListener("click", function(event) {
+
+    let code = Math.floor(Math.random() * 9000) + 1000;
+
+    window.location.href = `room/host?code=${code}`;
+
+})
+
 // Upload button. Eventually we can use querySelector instead when we make classes for styling
 document.getElementById('uploadForm').addEventListener('submit', function(event) {
     // Use normal HTTP requests here since we are sending one file a single time
