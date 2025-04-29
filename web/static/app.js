@@ -4,6 +4,10 @@ recordButton.innerText = "Record"
 const address = "localhost:5000"
 let processing = false;
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // Upload button. Eventually we can use querySelector instead when we make classes for styling
 document.getElementById('uploadForm').addEventListener('submit', function(event) {
     // Use normal HTTP requests here since we are sending one file a single time
@@ -55,7 +59,11 @@ document.getElementById('uploadForm').addEventListener('submit', function(event)
 
 // Live record button
 document.getElementById('record').addEventListener('click', function(event) {
+    if(document.getElementById('button')) {
+        return;
+    }
     // Since we are sending data quite often it is beneficial to use a websocket instead of remaking HTTP requests 100 times
+    // https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder
     if (navigator.mediaDevices) {
         console.log("getUserMedia supported.");
         // ask for audio (microphone) access
@@ -64,6 +72,7 @@ document.getElementById('record').addEventListener('click', function(event) {
         let chunks = [];
         let recording = false;
         let headerBlob = null;
+        result.innerText = "Result: "
     
         navigator.mediaDevices
         .getUserMedia(constraints)
@@ -71,6 +80,7 @@ document.getElementById('record').addEventListener('click', function(event) {
             // create mediaRecorder object and start recording
             const mediaRecorder = new MediaRecorder(stream, {
                 // webm format to improve compatibility (ogg didnt work for chrome)
+                // https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/mimeType
                 mimeType: 'audio/webm'
               });
             // 2000 means ondatavailable will be called every 2000 ms or 2 seconds
@@ -89,7 +99,7 @@ document.getElementById('record').addEventListener('click', function(event) {
             }) 
             recording = true;
             recordButton.innerText = "Recording";
-
+            
             // create stop button
             const stopButton = document.createElement("button");
             stopButton.textContent = "Stop";
@@ -100,14 +110,18 @@ document.getElementById('record').addEventListener('click', function(event) {
                 recordButton.innerText = "Record";
                 mediaRecorder.stop(); 
                 recording = false;
-
                 document.body.removeChild(stopButton);
+            }
+            mediaRecorder.onstart = () => {
+                sleep(30);
+                headerBlob = mediaRecorder.requestData();
             }
             // change styling of website here while recording
             mediaRecorder.onstop = () => {
                 console.log("Mediarecorder stopped")
-                if(processing = false) {
-                    // concatenate all remaining data we have and send it 
+                if(processing === false) {
+                    // concatenate all remaining data we have and send it
+                    // chunks should already contain header 
                     let concatenatedBlob = new Blob(chunks, { type: 'audio/webm' });
                     socket.emit('message', concatenatedBlob)
                     socket.close()
@@ -115,9 +129,11 @@ document.getElementById('record').addEventListener('click', function(event) {
             }
             // this aggregates data into chunks from the event e (takes place everytime new data is available)
             mediaRecorder.ondataavailable = async (e) =>  {
+                console.log(chunks.length)
                 // send to backend via websocket
                 // await message so we dont overload backend
                 if(headerBlob == null) {
+                    console.log("null")
                     // get webm header. if we don't append this to every chunk we send it won't be recognized as valid
                     headerBlob = e.data;
                     chunks.push(headerBlob)
@@ -136,21 +152,21 @@ document.getElementById('record').addEventListener('click', function(event) {
                 console.log("Message sent")
                 
                 // reset chunks. if we want to pass the audio cumulatively (helpful for context, better transcription) then don't do this
-                chunks = []
+                //chunks = [];
+                chunks.length = 0;
                 // push header to make next audio chunk valid
-                chunks.push(headerBlob)
+                chunks.push(headerBlob);
 
                 processing = true;
                 // await response from server
                 await new Promise((resolve, reject) => {
                     socket.on('message', (msg) => {
-                        result.innerText = msg;
+                        result.innerText += msg;
                         console.log(`MESSAGE RECEIVED ${msg}`);
                         resolve();
                     });
                 })
                 processing = false;
-
                 // window.scrollTo(0, document.body.scrollHeight); cool bit we can do after text is transcribed
                 // add an area below the icon and have text displayed there
                 // need to change element from recordButton for that

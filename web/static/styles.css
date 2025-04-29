@@ -1,0 +1,228 @@
+/* General Styles */
+body {
+    background-color: #f5f5dc; /* Soft beige */
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Heading Styles */
+h1, h2 {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    text-align: center;
+    margin: 0.5em 0;
+    width: 100%;
+    display: block;
+}
+
+h1 {
+    font-size: 2.5em;
+    color: #5d4037; /* Dark brown */
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+h2 {
+    font-size: 1.8em;
+    color: #6d4c41; /* Medium brown */
+    border-bottom: 3px solid #8d6e63; /* Warm brown */
+    padding: 5px 20px;
+    display: inline-block;
+    margin: 0 auto;
+}
+
+/* Main Container */
+.container {
+    display: flex;
+    justify-content: space-around;
+    max-width: 800px;
+    margin: 20px auto;
+    position: relative;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.9); /* White with slight transparency */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    gap: 20px; /* Added gap between columns */
+}
+
+/* Vertical Line */
+.vertical-line {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 1px;
+    height: 80%;
+    background-color: #8d6e63; /* Warm brown */
+    opacity: 0.5;
+}
+
+/* Columns */
+.column {
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Form Elements */
+.form-group {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px; /* vertical spacing */
+}
+
+/* File input hidden, custom label styled */
+input[type="file"] {
+    width: 100%;
+    max-width: 300px;
+    padding: 10px 20px;
+    background-color: #a1887f; /* Muted brown */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+    display: none; /* Hide default input */
+}
+
+.custom-file-upload {
+    padding: 10px 20px;
+    background-color: #6d4c41; /* Muted brown */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-block;
+    text-align: center;
+}
+
+.custom-file-upload:hover {
+    background-color: #8d6e63; /* Darker brown */
+}
+
+/* Buttons */
+button {
+    padding: 10px 20px;
+    background-color: #6d4c41; /* Warm brown */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1em;
+}
+
+button:hover {
+    background-color: #8d6e63; /* Darker brown */
+}
+
+/* Image Container */
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 30vh;
+    margin-top: 40px;
+}
+
+.image-container img {
+    width: 300px;
+    height: auto;
+    border: 5px solid #8d6e63; /* Warm brown */
+    padding: 10px;
+    border-radius: 10px;
+    background-color: white;
+    display: block;
+}
+
+/* Room Controls */
+.room-controls {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+#createRoom {
+    background-color: #6d4c41; /* Dark brown */
+    padding: 12px 24px;
+    font-size: 1.1em;
+    width: 200px;
+}
+
+#createRoom:hover {
+    background-color: #8d6e63; /* Darker brown */
+}
+
+.room-code-entry {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    width: 100%;
+    max-width: 350px;
+}
+
+#roomCode {
+    padding: 10px;
+    border: 1px solid #6d4c41; /* Warm brown */
+    border-radius: 4px;
+    width: 100%;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+#joinRoom {
+    background-color: #6d4c41; /* Warm brown */
+    padding: 10px 20px;
+    white-space: nowrap;
+}
+
+#joinRoom:hover {
+    background-color: #8d6e63; /* Darker brown */
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    .container {
+        flex-direction: column;
+        gap: 40px;
+    }
+    
+    .vertical-line {
+        display: none;
+    }
+    
+    .column {
+        width: 100%;
+    }
+    
+    .image-container {
+        min-height: 20vh;
+    }
+    
+    .room-controls {
+        max-width: 100%;
+        padding: 10px;
+    }
+    
+    .room-code-entry {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    #joinRoom, #createRoom {
+        width: 100%;
+    }
+}
