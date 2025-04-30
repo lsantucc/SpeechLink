@@ -4,11 +4,43 @@ recordButton.innerText = "Record"
 const address = "localhost:5000"
 let processing = false;
 
+// Creates the room for the host and displays the host the code
 document.getElementById('createRoom').addEventListener("click", function(event) {
 
     let code = Math.floor(Math.random() * 9000) + 1000;
 
+    const formData = new FormData();
+    formData.append('code', code);
+
+    fetch('/room/host', {
+        method: 'POST',
+        body: formData
+    })
+
     window.location.href = `room/host?code=${code}`;
+
+})
+
+// Will enter the person into the room if the code is valid
+document.getElementById('joinRoom').addEventListener("click", function(event) {
+
+    let code = document.getElementById('roomCode').value;
+
+    const formData = new FormData();
+    formData.append('code', code);
+
+    fetch('/room/user', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.status == 926) {
+            document.getElementById("errorMsg").innerText = "Invalid code. Please try again.";
+            return;
+        }
+
+        window.location.href= `room/user?code=${code}`;
+    })
 
 })
 
@@ -62,7 +94,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(event)
 });
 
 // Live record button
-document.getElementById('record').addEventListener('click', function(event) {
+document.getElementById('recordHost').addEventListener('click', function(event) {
     if(document.getElementById('button')) {
         return;
     }
@@ -152,6 +184,7 @@ document.getElementById('record').addEventListener('click', function(event) {
                 // await response from server
                 await new Promise((resolve, reject) => {
                     socket.on('message', (msg) => {
+                        // formData fetch here and post msg to the backend wheere it is added to a data base
                         result.innerText = msg;
                         console.log(`MESSAGE RECEIVED ${msg}`);
                         resolve();

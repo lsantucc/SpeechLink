@@ -20,8 +20,15 @@
         let sessionID = params.get("code");
 
         document.getElementById("codeOutput").textContent = sessionID;
-
         </script>
+
+<div class="column">
+    <div class="form-group">
+        <button id="recordHost">Record</button>
+    </div>
+</div>
+
+<div id="result"></div>
     
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>

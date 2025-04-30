@@ -14,6 +14,21 @@ class Upload:
 def connect():
     return sqlite3.connect("uploads.db")
 
+def connectCodes():
+    return sqlite3.connect("codes.db")
+
+def create_entryCode(con, code):
+    cur = con.cursor()
+    cur.execute("INSERT INTO codes (code) VALUES (?)", (code,))
+    
+    con.commit()
+    return cur.lastrowid
+
+def return_entryCode(con, code):
+    cur = con.cursor()
+    cur.execute(f"SELECT * FROM codes WHERE code=?", (code,))
+    return cur.fetchone() 
+
 def disconnect(con):
     con.commit()
     con.close()
@@ -59,5 +74,19 @@ if __name__ == "__main__":
 
     conn.commit()
     conn.close()
+
+    conn = sqlite3.connect('codes.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS codes (
+            code INTEGER NOT NULL
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+
+    
 
     

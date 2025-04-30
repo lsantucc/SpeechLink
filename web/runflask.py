@@ -40,14 +40,35 @@ whisper_model = whisperx.load_model(model, device=device, compute_type=compute_t
 # SQL Injection is mostly prevented by default; the default response type in flask is HTML which is automatically escaped (sanitized)
 @app.route('/')
 def index():
-    print(f"CWD is {os.getcwd()}")
     return render_template("index.html")
 
-@app.route('/room/host')
+@app.route('/room/host', methods=["GET","POST"])
 def host():
+
+    if request.method == "POST":
+        code = request.form.get('code')
+        con = db.connectCodes()
+        try:
+            db.create_entryCode(con, code)
+        finally:
+            db.disconnect(con)
+
     return render_template("host.html")
-@app.route('/room/user')
+
+@app.route('/room/user', methods=["GET","POST"])
 def user():
+
+    if request.method == "POST":
+        code = request.form.get('code')
+        con = db.connectCodes()
+        try:
+            tempCode = db.return_entryCode(con, code)
+        finally:
+            db.disconnect(con)
+
+        if (tempCode is None) or (str(tempCode[0]) != str(code)):
+            return '', 926
+
     return render_template("user.html")
 
 # Route for when user uploads a file
