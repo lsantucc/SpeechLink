@@ -3,9 +3,6 @@
 import whisperx
 import tempfile
 import os
-from pydub import AudioSegment
-from pydub.silence import detect_silence
-import numpy as np
 import datetime
 
 def transcribe(audio_data, model, device="cuda"):

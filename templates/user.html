@@ -9,7 +9,6 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
 
 </head>
 <body>
@@ -31,6 +30,7 @@
         let hostSessionID = null
 
         result = document.getElementById("result")
+        result.innerText = ""
 
         document.getElementById("codeOutput").textContent = sessionID;
 

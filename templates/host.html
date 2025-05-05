@@ -6,10 +6,8 @@
     <title>Audio to Text Transcriber/Translator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='host.css') }}">
 
-
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
 
 </head>
 <body>
@@ -31,6 +29,7 @@
     let sessionID = new URLSearchParams(window.location.search).get("code");
     document.getElementById("codeOutput").textContent = sessionID;
     result = document.getElementById("result")
+    result.innerText = ""
 
     let socket = io()
 
