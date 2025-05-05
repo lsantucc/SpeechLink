@@ -11,6 +11,7 @@ import whisper_app
 import hashlib
 import whisperx
 from flask_socketio import SocketIO
+from flask_socketio import join_room
 
 app = Flask(__name__)
 
@@ -113,21 +114,53 @@ def upload_file():
     # if file isnt valid for whatever reason
     return '', 500
 
+# Need a socket for when the user wants the transibed message
+
+@socketio.on('join_room')
+def handle_join(data):
+    session_id = data
+
+    join_room(session_id)
+    
+    socketio.emit('joined')
+
+""" @socketio.on('request')
+def request_live_transcription(data):
+    sessionID = data
+    
+    con = db.connectCodes()
+
+    msg = db.requestTranscript(con, sessionID)
+    db.disconnect(con)
+
+    socketio.emit("request", msg)
+     """
+
 # Socket for live recording
 @socketio.on('message')
 def receive_raw_audio(data):
     try:
         # implement silence checking here, etc.
+        sessionID = data.get('code')
+        msg = data.get('msg')
 
         # debugging
-        print(type(data), len(data))
+        print(type(msg), len(msg))
 
         # need database to hold transcribed text overtime for room code function
-        transcribed_text, language = whisper_app.transcribe(data, whisper_model)
+        transcribed_text, language = whisper_app.transcribe(msg, whisper_model)
+
 
         # send text to frontend via websocket. maybe need to use emit
-        socketio.emit("message", transcribed_text)
+        socketio.emit("message", transcribed_text, room=sessionID)
+        socketio.emit("request", transcribed_text, room=sessionID)
         print("emitted to frontend")
+        socketio.emit("code", sessionID)
+
+        con = db.connectCodes()
+        db.insert_or_update_message(con, sessionID, transcribed_text)
+        db.disconnect(con)
+
         
     except Exception as e:
         print(e)

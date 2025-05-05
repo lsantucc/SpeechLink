@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio to Text Transcriber/Translator</title>
-    <link rel="stylesheet" href="styles.css" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
 
 </head>
@@ -20,6 +20,8 @@
             <button id="joinRoom">Join Room</button>
         </div>
     </div>
+
+    <div id="errorMsg" style="color: red; margin-top: 10px;"></div>
 
     <!-- Main Container -->
     <div class="container">
@@ -42,7 +44,7 @@
         <!-- Vertical Divider Line -->
         <div class="vertical-line"></div>
 
-        <!-- Right Column -->  
+        <!-- Right Column -->
         <div class="column">
             <div class="form-group">
                 <button id="record">Record audio</button>
@@ -53,9 +55,7 @@
     <div id="result"></div>
     
     <div class="image-container">
-        <img src="mic.jpg" alt="A description of the image">
-
-
+        <img src="{{ url_for('static', filename='assets/mic.jpg') }}" alt="Mic">
 
     </div>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>

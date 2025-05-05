@@ -1,7 +1,8 @@
 const recordButton = document.getElementById('record')
-const result = document.getElementById('result')
+let result = document.getElementById('result')
 recordButton.innerText = "Record"
 const address = "localhost:5000"
+
 let processing = false;
 
 // Creates the room for the host and displays the host the code
@@ -20,6 +21,7 @@ document.getElementById('createRoom').addEventListener("click", function(event) 
     window.location.href = `room/host?code=${code}`;
 
 })
+
 
 // Will enter the person into the room if the code is valid
 document.getElementById('joinRoom').addEventListener("click", function(event) {
@@ -94,7 +96,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(event)
 });
 
 // Live record button
-document.getElementById('recordHost').addEventListener('click', function(event) {
+document.getElementById('record').addEventListener('click', function(event) {
     if(document.getElementById('button')) {
         return;
     }

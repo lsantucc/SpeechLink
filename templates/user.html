@@ -4,23 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio to Text Transcriber/Translator</title>
-    <link rel="stylesheet" href="user.css" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='user.css') }}">
+
+
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+
 </head>
 <body>
     <h1>Audio Translator</h1>
     <h2>Room Session</h2>
 
+    <!-- Room Section -->
+
     <div class="controls-container">
         <h3>USER Session ID: <span id="codeOutput"></span></h3>
     </div>
 
+    <div id="result"></div>
+
     <script>
         let params = new URLSearchParams(window.location.search);
         let sessionID = params.get("code");
+        let prevMsg = null
+        let hostSessionID = null
+
+        result = document.getElementById("result")
+
         document.getElementById("codeOutput").textContent = sessionID;
+
+        socket = io()
+
+        socket.emit('join_room', sessionID)
+        socket.on('joined', () => {
+            console.log("Joined room: " + sessionID);
+        })
+
+        /*setInterval(() => {
+            socket.emit('request', sessionID);
+            
+        }, 2000);
+            // Might have to check if the current message is the same as the messsage that got outputed just before (if msg = prevMsg {skip}) this is if it's too fast getting the data from the DB
+        
+        socket.on('code', (data) => {
+            hostSessionID = data
+       })*/
+    
+        socket.on('request', (msg) => {
+            console.log("Received transcription:", msg);
+            //if (msg.length > 0) {
+            /*if (msg !== prevMsg && sessionID != hostSessionID) {*/
+                //newMsg = msg.slice(prevMsg.length);
+                //prevMsg = msg;
+                // formData fetch here and post msg to the backend wheere it is added to a data base
+                result.innerText = msg;
+                console.log(`MESSAGE RECEIVED ${msg}`);
+            /*} else {
+                console.log("Duplicate message skipped");
+            }*/
+            //}
+            })
+        
+
     </script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    
 </body>
 </html>

@@ -4,12 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio to Text Transcriber/Translator</title>
-    <link rel="stylesheet" href="host.css" type="text/css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='host.css') }}">
+
+
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+
 </head>
 <body>
     <h1>Audio Translator</h1>
     <h2>Room Session</h2>
+
+    <!-- Room Section -->
 
     <div class="controls-container">
         <h3>HOST Session ID: <span id="codeOutput"></span></h3>
@@ -18,20 +25,144 @@
         </div>
     </div>
 
-    <div id="result"></div>
+<div id="result"></div>
 
-    <script>
-        let params = new URLSearchParams(window.location.search);
-        let sessionID = params.get("code");
-        document.getElementById("codeOutput").textContent = sessionID;
-    </script>
-        <div class="image-container">
-            <img src="mic.jpg" alt="A description of the image">
+<script>
+    let sessionID = new URLSearchParams(window.location.search).get("code");
+    document.getElementById("codeOutput").textContent = sessionID;
+    result = document.getElementById("result")
+
+    let socket = io()
+
+    socket.emit('join_room', sessionID)
+    socket.on('joined', () => {
+        console.log("Joined room");
+    })
+
+    document.getElementById('recordHost').addEventListener('click', function(event) {
+
+        const recordButton = document.getElementById('recordHost')
+        let processing = false
+
+    if(document.getElementById('button')) {
+        return;
+    }
+    // Since we are sending data quite often it is beneficial to use a websocket instead of remaking HTTP requests 100 times
+    // https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder
+    if (navigator.mediaDevices) {
+        console.log("getUserMedia supported.");
+        // ask for audio (microphone) access
+        const constraints = { audio: true };
+        // chunks will contain our audio
+        let chunks = [];
+        let recording = false;
+        let headerBlob = null;
+        result.innerText = "Result: "
     
+        navigator.mediaDevices
+        .getUserMedia(constraints)
+        .then((stream) => {
+            // create mediaRecorder object and start recording
+            const mediaRecorder = new MediaRecorder(stream, {
+                // webm format to improve compatibility (ogg didnt work for chrome)
+                // https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/mimeType
+                mimeType: 'audio/webm'
+              });
+            // 1000 means ondatavailable will be called every 2000 ms or 2 seconds
+            mediaRecorder.start(1000);
+
+            // create socket https://socket.io/docs/v4/tutorial
+            //socket = io(); 
+            
+            console.log("WebSocket created")
+            socket.on('connect', () => {
+                console.log("Websocket connected")
+            })
+            
+            socket.on('disconnect', () => {
+                console.log("Websocket disconnected")
+            }) 
+            recording = true;
+            recordButton.innerText = "Recording";
+            
+            // create stop button
+            const stopButton = document.createElement("button");
+            stopButton.textContent = "Stop";
+            document.body.appendChild(stopButton)
+
+            stopButton.onclick = () => {
+                console.log("Stop clicked");
+                recordButton.innerText = "Record";
+                mediaRecorder.stop(); 
+                recording = false;
+                document.body.removeChild(stopButton);
+            }
+            // change styling of website here while recording
+            mediaRecorder.onstop = () => {
+                console.log("Mediarecorder stopped")
+                if(processing === false) {
+                    // concatenate all remaining data we have and send it
+                    // chunks should already contain header 
+                    let concatenatedBlob = new Blob(chunks, { type: 'audio/webm' });
+                    socket.emit('message', concatenatedBlob)
+                    socket.close()
+                }
+            }
+            // this aggregates data into chunks from the event e (takes place everytime new data is available)
+            mediaRecorder.ondataavailable = async (e) =>  {
+                console.log(chunks.length)
+                // send to backend via websocket
+                // await message so we dont overload backend
+                if(headerBlob == null) {
+                    console.log("headerBlob is null")
+                    // get webm header. if we don't append this to every chunk we send it won't be recognized as valid
+                    // get first 100 bytes
+                    headerBlob = e.data.slice(0, 2000);
+                    chunks.push(headerBlob)
+                }  
+                if(processing) {
+                    chunks.push(e.data);
+                    return;
+                }
+                chunks.push(e.data)
+                // concatenate audio chunks and send to backend
+                let conBlob = new Blob(chunks, { type: 'audio/webm' });
+
+                const codeNmessage = {
+                    code: sessionID,
+                    msg: conBlob
+                };
+                socket.emit('message', codeNmessage)
+
+                //socket.emit('message', conBlob) 
+                console.log("Message sent")
+                processing = true;
+                // await response from server
+                await new Promise((resolve, reject) => {
+                    socket.on('message', (msg) => {
+                        // formData fetch here and post msg to the backend wheere it is added to a data base
+                        result.innerText = msg;
+                        console.log(`MESSAGE RECEIVED ${msg}`);
+                        resolve();
+                    });
+                })
+                processing = false;
+                // window.scrollTo(0, document.body.scrollHeight); cool bit we can do after text is transcribed
+                // add an area below the icon and have text displayed there
+                // need to change element from recordButton for that
+            }
+        })
+        .catch((err) => {
+            console.error(`Error occured: ${err}`)
+        });
+    }
+})
+
+</script>
+
+<div class="image-container">
+    <img src="{{ url_for('static', filename='assets/mic.jpg') }}" alt="Mic">
+</div>
     
-    
-        </div>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
