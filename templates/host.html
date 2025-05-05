@@ -4,32 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio to Text Transcriber/Translator</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="host.css" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
-
 </head>
 <body>
     <h1>Audio Translator</h1>
     <h2>Room Session</h2>
 
-    <!-- Room Section -->
+    <div class="controls-container">
+        <h3>HOST Session ID: <span id="codeOutput"></span></h3>
+        <div class="form-group">
+            <button id="recordHost">Record</button>
+        </div>
+    </div>
 
-    <h3>  HOST Session ID: <span id="codeOutput"></span> </h3>
+    <div id="result"></div>
+
     <script>
         let params = new URLSearchParams(window.location.search);
         let sessionID = params.get("code");
-
         document.getElementById("codeOutput").textContent = sessionID;
-        </script>
-
-<div class="column">
-    <div class="form-group">
-        <button id="recordHost">Record</button>
-    </div>
-</div>
-
-<div id="result"></div>
+    </script>
+        <div class="image-container">
+            <img src="mic.jpg" alt="A description of the image">
     
+    
+    
+        </div>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
