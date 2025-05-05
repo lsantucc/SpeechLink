@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio to Text Transcriber/Translator</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
 
 </head>
@@ -22,8 +22,6 @@
     </div>
 
     <div id="errorMsg" style="color: red; margin-top: 10px;"></div>
-
-    <div id="result"></div>
     
     <div class="image-container">
         <img src="{{ url_for('static', filename='assets/mic.jpg') }}" alt="Mic">

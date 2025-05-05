@@ -23,6 +23,15 @@
 
     <div id="result"></div>
 
+    <style>
+    #result {
+        width: 80%;
+        max-width: 400px;
+        margin: 20px auto;
+        text-align: center;
+    }
+    </style>
+
     <script>
         let params = new URLSearchParams(window.location.search);
         let sessionID = params.get("code");

@@ -66,6 +66,14 @@ h3 {
     letter-spacing: 1px;
 }
 
+#result {
+    margin: 20px auto;  
+    width: 80%;        
+    max-width: 400px;   
+    display: block;
+    text-align: center; 
+}
+
 @media (max-width: 600px) {
     h1 {
         font-size: 2em;
