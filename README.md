@@ -30,10 +30,12 @@ To begin a transcription, simply click "Create New Room", allow microphone acces
 
 Any person with a code can join the associated room to view a live transcription of audio spoken by the host of that room. 
 
-**In the event that you cannot get the software to work locally, please contact Levi Tipton via email (ltipto11@vols.utk.edu) to get a link to the hosted version.**
-
 
 
 **Known Bugs:**
 
 The websocket seems to have a limit of 1 MB of data transfer which is reached after around 60 seconds of transcription. 
+
+
+
+**In the event that you cannot get the software to work locally, please contact Levi Tipton via email (ltipto11@vols.utk.edu) to get a link to the hosted version.**
