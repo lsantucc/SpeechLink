@@ -19,7 +19,7 @@ Flask-SocketIO v5.5.1
 
 NOTE: To run WhisperX with CUDA support, you need Torch with CUDA. By default, installing WhisperX will install Torch with CPU support **ONLY**.
 
-We recommend you to visit this page to get a GPU compatible Torch version for your system after installing WhisperX (https://pytorch.org/get-started/locally/)
+If you have an NVIDIA GPU, we recommend you to visit this page to get a GPU compatible Torch version for your system after installing WhisperX (https://pytorch.org/get-started/locally/)
 
 
 
