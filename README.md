@@ -2,7 +2,7 @@
 
 **What is SpeechLink?**
 
-SpeechLink is a live transcription service meant for use in situations where spoken words may not be easily heard or audience members do not speak the speaker's language. SpeechLink allows a speaker to create a Host room, in which the Host can begin recording and broadcasting a live transcription of their speech to anyone who has joined their room via a sessionID (code). Translation is done in the event the spoken language is NOT English.
+SpeechLink is a live transcription service meant for use in situations where spoken words may not be easily heard or audience members do not speak the speaker's language. SpeechLink allows a speaker to create a Host room, in which the Host can begin recording and broadcasting a live transcription of their speech to anyone who has joined their room via a sessionID (code).
 
 
 **Developed with the following dependencies:**
@@ -31,7 +31,7 @@ The software has three pages: the frontpage where you can create a room or join 
 
 To begin a transcription, simply click "Create New Room", allow microphone access when prompted, and click the Record button to begin recording audio.
 
-Any person with a code can join the associated room to view a live transcription of audio spoken by the host of that room. 
+Any person with a code can join the associated room to view a live transcription of audio spoken by the host of that room. In the event the speaker is not speaking English, a translation will be done on the transcribed text.
 
 
 
