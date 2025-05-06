@@ -1,6 +1,6 @@
 **SpeechLink, a live transcription service**
 
-![mic](https://github.com/user-attachments/assets/6fe5d115-bf71-4e4c-8ae2-88d889c5b608)
+![mic](https://github.com/user-attachments/assets/f633fe7f-262e-4293-9bc9-d829cc47126e)
 
 
 **Developed with the following dependencies:**
