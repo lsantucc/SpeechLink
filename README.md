@@ -1,6 +1,8 @@
 **SpeechLink, a live transcription service**
 
-![mic](https://github.com/user-attachments/assets/f633fe7f-262e-4293-9bc9-d829cc47126e)
+**What is SpeechLink?**
+
+SpeechLink is a live transcription service meant for use in situations where spoken words may not be easily heard or audience members do not speak the speaker's language. SpeechLink allows a speaker to create a Host room, in which the Host can begin recording and broadcasting a live transcription of their speech to anyone who has joined their room via a sessionID (code).
 
 
 **Developed with the following dependencies:**
