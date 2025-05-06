@@ -3,9 +3,13 @@
 **Developed with the following dependencies:**
 
 Python 3.11.x (WhisperX will **NOT BUILD** with Python 3.12.x or Python 3.13.x)
+
 Flask v3.1.0
+
 Flask-Limiter v3.12
+
 WhisperX v3.3.2
+
 Flask-SocketIO v5.5.1
 
 NOTE: To run WhisperX with CUDA support, you need Torch with CUDA. By default, installing WhisperX will install Torch with CPU support **ONLY**.
