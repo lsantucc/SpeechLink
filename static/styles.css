@@ -1,11 +1,11 @@
-/* General Styles */
+/* CSS styling for styles page */
+
 body {
-    background-color: #f5f5dc; /* Soft beige */
+    background-color: #f5f5dc; /* beige */
     margin: 0;
     font-family: Arial, sans-serif;
 }
 
-/* Heading Styles */
 h1, h2 {
     font-family: 'Segoe UI', Arial, sans-serif;
     font-weight: 600;
@@ -31,7 +31,7 @@ h2 {
     margin: 0 auto;
 }
 
-/* Main Container */
+/* Main container */
 .container {
     display: flex;
     justify-content: space-around;
@@ -39,7 +39,7 @@ h2 {
     margin: 20px auto;
     position: relative;
     padding: 20px;
-    background-color: rgba(255, 255, 255, 0.9); /* White with slight transparency */
+    background-color: rgba(255, 255, 255, 0.9); /* White */
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     gap: 20px; /* Added gap between columns */
@@ -72,37 +72,6 @@ h2 {
     display: flex;
     justify-content: center;
     margin-bottom: 15px; /* vertical spacing */
-}
-
-/* File input hidden, custom label styled */
-input[type="file"] {
-    width: 100%;
-    max-width: 300px;
-    padding: 10px 20px;
-    background-color: #a1887f; /* Muted brown */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    text-align: center;
-    display: none; /* Hide default input */
-}
-
-.custom-file-upload {
-    padding: 10px 20px;
-    background-color: #6d4c41; /* Muted brown */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    display: inline-block;
-    text-align: center;
-}
-
-.custom-file-upload:hover {
-    background-color: #8d6e63; /* Darker brown */
 }
 
 /* Buttons */
@@ -193,7 +162,7 @@ button:hover {
     background-color: #8d6e63; /* Darker brown */
 }
 
-/* Mobile Responsiveness */
+/* Mobile */
 @media (max-width: 600px) {
     .container {
         flex-direction: column;

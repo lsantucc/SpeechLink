@@ -1,3 +1,5 @@
+/* CSS styling for user page */
+
 body {
     background-color: #f5f5dc;
     margin: 0;
@@ -64,6 +66,14 @@ h3 {
     border: 1px solid #8d6e63;
     margin-left: 8px;
     letter-spacing: 1px;
+}
+
+#result {
+    margin: 20px auto;  
+    width: 80%;        
+    max-width: 400px;   
+    display: block;
+    text-align: center; 
 }
 
 @media (max-width: 600px) {

@@ -1,4 +1,5 @@
-# Interact with SQL database
+# Interact with SQLite3 database via functions (insert, fetch stuff).
+
 import sqlite3
 from datetime import datetime
 

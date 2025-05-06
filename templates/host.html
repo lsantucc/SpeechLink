@@ -1,9 +1,12 @@
+<!-- Host page where someone hosting a room can record what they are saying -->
+ <!-- Audio recorded is sent to backend for transcription -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio to Text Transcriber/Translator</title>
+    <title>SpeechLink</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='host.css') }}">
 
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
@@ -11,10 +14,8 @@
 
 </head>
 <body>
-    <h1>Audio Translator</h1>
+    <h1>SpeechLink</h1>
     <h2>Room Session</h2>
-
-    <!-- Room Section -->
 
     <div class="controls-container">
         <h3>HOST Session ID: <span id="codeOutput"></span></h3>
@@ -23,6 +24,7 @@
         </div>
     </div>
 
+<!-- Result text goes here -->
 <div id="result"></div>
 
 <script>
@@ -31,6 +33,7 @@
     result = document.getElementById("result")
     result.innerText = ""
 
+    // Create socket
     let socket = io()
 
     socket.emit('join_room', sessionID)
@@ -52,9 +55,13 @@
         console.log("getUserMedia supported.");
         // ask for audio (microphone) access
         const constraints = { audio: true };
-        // chunks will contain our audio
+        // Chunks will contain our cumulative audio chunks. Opted to send audio cumulatively because 
+        // the first chunk is the only one that contains the header, making subsequent chunks invalid audio files.
+        // It was also an issue to do chunks individually because some words can get split in the middle of when they are spoken
+        // Whisper performs better with context so the transcription will improve overtime 
         let chunks = [];
         let recording = false;
+        // HeaderBlob contains the header for the file
         let headerBlob = null;
         result.innerText = "Result: "
     
@@ -88,7 +95,7 @@
             const stopButton = document.createElement("button");
             stopButton.textContent = "Stop";
             document.body.appendChild(stopButton)
-
+            // Set function for stop button
             stopButton.onclick = () => {
                 console.log("Stop clicked");
                 recordButton.innerText = "Record";
@@ -96,7 +103,6 @@
                 recording = false;
                 document.body.removeChild(stopButton);
             }
-            // change styling of website here while recording
             mediaRecorder.onstop = () => {
                 console.log("Mediarecorder stopped")
                 if(processing === false) {
@@ -111,14 +117,15 @@
             mediaRecorder.ondataavailable = async (e) =>  {
                 console.log(chunks.length)
                 // send to backend via websocket
-                // await message so we dont overload backend
                 if(headerBlob == null) {
                     console.log("headerBlob is null")
-                    // get webm header. if we don't append this to every chunk we send it won't be recognized as valid
-                    // get first 100 bytes
+                    // get webm header. 
+                    // get first 2000 bytes
                     headerBlob = e.data.slice(0, 2000);
                     chunks.push(headerBlob)
                 }  
+                // dont want to overload server so when we are processing (i.e. waiting for a message from the backend)
+                // we push audio data onto chunks
                 if(processing) {
                     chunks.push(e.data);
                     return;
@@ -126,29 +133,25 @@
                 chunks.push(e.data)
                 // concatenate audio chunks and send to backend
                 let conBlob = new Blob(chunks, { type: 'audio/webm' });
-
+                // add room metadata
                 const codeNmessage = {
                     code: sessionID,
                     msg: conBlob
                 };
+                // emit message
                 socket.emit('message', codeNmessage)
-
-                //socket.emit('message', conBlob) 
+ 
                 console.log("Message sent")
                 processing = true;
                 // await response from server
                 await new Promise((resolve, reject) => {
                     socket.on('message', (msg) => {
-                        // formData fetch here and post msg to the backend wheere it is added to a data base
                         result.innerText = msg;
                         console.log(`MESSAGE RECEIVED ${msg}`);
                         resolve();
                     });
                 })
                 processing = false;
-                // window.scrollTo(0, document.body.scrollHeight); cool bit we can do after text is transcribed
-                // add an area below the icon and have text displayed there
-                // need to change element from recordButton for that
             }
         })
         .catch((err) => {

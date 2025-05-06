@@ -1,3 +1,5 @@
+// The main javascript code for index.html 
+
 document.addEventListener("DOMContentLoaded", function () {
     let result = document.getElementById('result')
     const address = "localhost:5000"
@@ -10,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const formData = new FormData();
         formData.append('code', code);
-
+        // Use POST request to send SessionID to backend for storage in database
         fetch('/room/host', {
             method: 'POST',
             body: formData
@@ -28,12 +30,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const formData = new FormData();
         formData.append('code', code);
-
+        // Send session ID to backend
         fetch('/room/user', {
             method: 'POST',
             body: formData
         })
         .then(response => {
+            // Error checking to see if code is valid
             if (response.status == 926) {
                 document.getElementById("errorMsg").innerText = "Invalid code. Please try again.";
                 return;
