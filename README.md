@@ -1,5 +1,5 @@
 **SpeechLink, a live transcription service**
-
+![mic](https://github.com/user-attachments/assets/6fe5d115-bf71-4e4c-8ae2-88d889c5b608)
 
 
 **Developed with the following dependencies:**
@@ -34,7 +34,7 @@ Any person with a code can join the associated room to view a live transcription
 
 **Known Bugs:**
 
-The websocket seems to have a limit of 1 MB of data transfer which is reached after around 60 seconds of transcription. 
+The websocket seems to have a limit of 1 MB of data transfer which is reached after around 60 seconds of transcription. This helps to prevent abuse so we decided not to fix it immediately.
 
 
 
